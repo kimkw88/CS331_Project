@@ -1,111 +1,212 @@
 # Author: Kwanghyuk Kim
+#         Hojun Shin
 # Due: April 19 2021
 # CS 331
 # Programming Assignment #1
 
 import sys
+import copy
+
+LEFT  = 0
+RIGHT = 1
+CHICKEN = 0
+WOLVES  = 1
+BOAT    = 2
+
+class Node:
+    def __init__(self, node, method, state):
+        self.par_node = node
+
+        # If boat is at left side
+        if state[LEFT][BOAT] == 1:
+            if method == 1:
+                # transport 1 chicken
+                state[LEFT][BOAT]        = 0
+                state[LEFT][CHICKEN]    -= 1
+                state[RIGHT][BOAT]       = 1
+                state[RIGHT][CHICKEN]   += 1
+            if method == 2:
+                # transport 2 chickens
+                state[LEFT][CHICKEN] -= 2 # chicken
+                state[RIGHT][CHICKEN] += 2 # chicken
+                state[LEFT][BOAT] = 0 # boat
+                state[RIGHT][BOAT] = 1 # boat
+            if method == 3:
+                # transport 1 wolf
+                state[LEFT][WOLVES] -= 1 # wolf
+                state[RIGHT][WOLVES] += 1 # wolf
+                state[LEFT][BOAT] = 0 # boat
+                state[RIGHT][BOAT] = 1 # boat
+            if method == 4:
+                # transport 2 wolves
+                state[LEFT][WOLVES] -= 2 # wolf
+                state[RIGHT][WOLVES] += 2 # wolf
+                state[LEFT][BOAT] = 0 # boat
+                state[RIGHT][BOAT] = 1 # boat
+            if method == 5:
+                # transport 1 chick and 1 wolf
+                state[LEFT][CHICKEN] -= 1 # chicken
+                state[RIGHT][CHICKEN] += 1 # chicken
+                state[LEFT][WOLVES] -= 1 # wolf
+                state[RIGHT][WOLVES] += 1 # wolf
+                state[LEFT][BOAT] = 0 # boat
+                state[RIGHT][BOAT] = 1 # boat
+        elif state[RIGHT][BOAT] == 1:
+            if method == 1:
+                # transport 1 chicken
+                state[LEFT][CHICKEN] += 1 # chicken
+                state[RIGHT][CHICKEN] -= 1 # chicken
+                state[LEFT][BOAT] = 1 # boat
+                state[RIGHT][BOAT] = 0 # boat
+            if method == 2:
+                # transport 2 chickens
+                state[LEFT][CHICKEN] += 2 # chicken
+                state[RIGHT][CHICKEN] -= 2 # chicken
+                state[LEFT][BOAT] = 1 # boat
+                state[RIGHT][BOAT] = 0 # boat
+            if method == 3:
+                # transport 1 wolf
+                state[LEFT][WOLVES] += 1 # wolf
+                state[RIGHT][WOLVES] -= 1 # wolf
+                state[LEFT][BOAT] = 1 # boat
+                state[RIGHT][BOAT] = 0 # boat
+            if method == 4:
+                # transport 2 wolves
+                state[LEFT][WOLVES] += 2 # wolf
+                state[RIGHT][WOLVES] -= 2 # wolf
+                state[LEFT][BOAT] = 1 # boat
+                state[RIGHT][BOAT] = 0 # boat
+            if method == 5:
+                # transport 1 chick and 1 wolf
+                state[LEFT][CHICKEN] += 1 # chicken
+                state[RIGHT][CHICKEN] -= 1 # chicken
+                state[LEFT][WOLVES] += 1 # wolf
+                state[RIGHT][WOLVES] -= 1 # wolf
+                state[LEFT][BOAT] = 1 # boat
+                state[RIGHT][BOAT] = 0 # boat
+            
+        # check if chickens are greater than or equal to wolves
+        if state[LEFT][CHICKEN] < 0 or state[LEFT][CHICKEN] > 3:
+            method = 0
+        if state[LEFT][WOLVES] < 0 or state[LEFT][WOLVES] > 3:
+           method = 0
+        if state[RIGHT][CHICKEN] < 0 or state[RIGHT][CHICKEN] > 3:
+            method = 0
+        if state[RIGHT][WOLVES] < 0 or state[RIGHT][WOLVES] > 3:
+            method = 0
+        if state[LEFT][CHICKEN] != 0 and state[LEFT][CHICKEN] < state[LEFT][WOLVES]:
+            method = 0
+        if state[RIGHT][CHICKEN] != 0 and state[RIGHT][CHICKEN] < state[RIGHT][WOLVES]:
+            method = 0
+
+        self.state = state
+        self.method = method
+
 
 # Breadth-First Search
 def bfs(init, goal, outputFile):
     print("***** BFS mode:")
-    writeFile = open(outputFile, "w")
-    que_arr = []
-    visited = []
-    count_node = 0
-    que_arr.append(init)
-    visited.append(init)
+    que_list  = []
+    visited  = []
+    solution = []
+    node_list = []
+    count = 0
+
+    # Initial state node
+    init_node = Node(-1, 0, init)
+    node_list.append(init_node)
+    que_list.append(init_node)
 
     while True:
-        state = que_arr.pop(0)
-        count_node += 1
-        print("Path", count_node, ":", state)
-        print()
-        writeFile.close()
-        exit()
+        cur_node = que_list.pop(0)
+        count += 1
+        
+        if not (cur_node.state in visited):
+            if cur_node.state == goal:
+                break
+            else:
+                visited.append(cur_node.state)
 
+                # Create, append, que child node
+                for i in range(1, 6):
+                    child_node = Node(node_list.index(cur_node), i, copy.deepcopy(cur_node.state))
+                    if child_node.method != 0:
+                        node_list.append(child_node)
+                        que_list.append(child_node)
+
+    solution_count = 0
+
+    while True:
+        solution.append(cur_node)
+        solution_count += 1
+        if cur_node.par_node == -1:
+            break
+        cur_node = node_list[cur_node.par_node]
+
+    solution.reverse()
+    print("Reached Goal!")
+    print("Solution: ")
+    for x in solution:
+        print(x.state)
+    print("Solution count: ", solution_count)
+    print("Expanded count: ", count)
 
 # Depth-First Search
 def dfs(init, goal, outputFile):
     print("***** DFS mode:")
+    stack_list  = []
+    visited  = []
+    solution = []
+    node_list = []
+    count = 0
+
+    # Initial state node
+    init_node = Node(-1, 0, init)
+    node_list.append(init_node)
+    stack_list.append(init_node)
+
+    while True:
+        cur_node = stack_list.pop()
+        count += 1
+        
+        if not (cur_node.state in visited):
+            if cur_node.state == goal:
+                break
+            else:
+                visited.append(cur_node.state)
+
+                # Create, append, que child node
+                for i in range(1, 6):
+                    child_node = Node(node_list.index(cur_node), i, copy.deepcopy(cur_node.state))
+                    if child_node.method != 0:
+                        node_list.append(child_node)
+                        stack_list.append(child_node)
+
+    solution_count = 0
+
+    while True:
+        solution.append(cur_node)
+        solution_count += 1
+        if cur_node.par_node == -1:
+            break
+        cur_node = node_list[cur_node.par_node]
+
+    solution.reverse()
+    print("Reached Goal!")
+    print("Solution: ")
+    for x in solution:
+        print(x.state)
+    print("Solution count: ", solution_count)
+    print("Expanded count: ", count)
 
 # Iterative-Deepening Depth First Search
 def iddfs(init, goal, outputFile):
     print("***** ID-DFS mode:")
+    
 
 # A-star search
 def astar(init, goal, outputFile):
     print("***** A* mode:")
-
-def child_node(arr):
-    boat = 1
-    # Left boat
-    if arr[0][2] == boat:
-        # transport 1 chicken
-        arr[0][0] = arr[0][0] - 1 # chicken
-        arr[1][0] = arr[1][0] + 1 # chicken
-        arr[0][2] = arr[0][2] - 1 # boat
-        arr[1][2] = arr[1][2] + 1 # boat
-        # transport 2 chickens
-        arr[0][0] = arr[0][0] - 2 # chicken
-        arr[1][0] = arr[1][0] + 2 # chicken
-        arr[0][2] = arr[0][2] - 1 # boat
-        arr[1][2] = arr[1][2] + 1 # boat
-        # transport 1 wolf
-        arr[0][1] = arr[0][1] - 1 # wolf
-        arr[1][1] = arr[1][1] + 1 # wolf
-        arr[0][2] = arr[0][2] - 1 # boat
-        arr[1][2] = arr[1][2] + 1 # boat
-        # transport 2 wolves
-        arr[0][1] = arr[0][1] - 2 # wolf
-        arr[1][1] = arr[1][1] + 2 # wolf
-        arr[0][2] = arr[0][2] - 1 # boat
-        arr[1][2] = arr[1][2] + 1 # boat
-        # transport 1 chick and 1 wolf
-        arr[0][0] = arr[0][0] - 1 # chicken
-        arr[1][0] = arr[1][0] + 1 # chicken
-        arr[0][1] = arr[0][1] - 1 # wolf
-        arr[1][1] = arr[1][1] + 1 # wolf
-        arr[0][2] = arr[0][2] - 1 # boat
-        arr[1][2] = arr[1][2] + 1 # boat
-    # Right boat
-    elif arr[1][2] == boat:
-        # transport 1 chicken
-        arr[0][0] = arr[0][0] + 1 # chicken
-        arr[1][0] = arr[1][0] - 1 # chicken
-        arr[0][2] = arr[0][2] + 1 # boat
-        arr[1][2] = arr[1][2] - 1 # boat
-        # transport 2 chickens
-        arr[0][0] = arr[0][0] + 2 # chicken
-        arr[1][0] = arr[1][0] - 2 # chicken
-        arr[0][2] = arr[0][2] + 1 # boat
-        arr[1][2] = arr[1][2] - 1 # boat
-        # transport 1 wolf
-        arr[0][1] = arr[0][1] + 1 # wolf
-        arr[1][1] = arr[1][1] - 1 # wolf
-        arr[0][2] = arr[0][2] + 1 # boat
-        arr[1][2] = arr[1][2] - 1 # boat
-        # transport 2 wolves
-        arr[0][1] = arr[0][1] + 2 # wolf
-        arr[1][1] = arr[1][1] - 2 # wolf
-        arr[0][2] = arr[0][2] + 1 # boat
-        arr[1][2] = arr[1][2] - 1 # boat
-        # transport 1 chick and 1 wolf
-        arr[0][0] = arr[0][0] + 1 # chicken
-        arr[1][0] = arr[1][0] - 1 # chicken
-        arr[0][1] = arr[0][1] + 1 # wolf
-        arr[1][1] = arr[1][1] - 1 # wolf
-        arr[0][2] = arr[0][2] + 1 # boat
-        arr[1][2] = arr[1][2] - 1 # boat
-
-# check if chickens are greater than or equal to wolves
-def check_GTE(arr):
-    if arr[0][0] >= arr[0][1] and arr[1][0] >= arr[1][1]:
-        return True
-    else:
-        if arr[0][0] == 0 or arr[1][0] == 0:
-            return True
-        else:
-            return False
 
 
 def readfile(filename):
