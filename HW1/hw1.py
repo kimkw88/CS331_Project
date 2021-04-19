@@ -221,26 +221,30 @@ def readfile(filename):
     file.close()
     return state
 
-
-if len(sys.argv) != 5:
-    print("Invalid Input! Please take the following command line 5 arguments:\n\thw1.py <initial state file> <goal state file> <mode> <output file>\n")
-    exit()
-else:
-    init = readfile(sys.argv[1])
-    print("init:", init)
-    goal = readfile(sys.argv[2])
-    print("goal:", goal)
-    mode = sys.argv[3]
-    output = sys.argv[4]
-
-    if mode == 'bfs':
-        bfs(init, goal, output)
-    elif mode == 'dfs':
-        dfs(init, goal, output)
-    elif mode == 'iddfs':
-        iddfs(init, goal, output)
-    elif mode == 'astar':
-        astar(init, goal, output)
-    else:
-        print("Invalid mode. Please try again.")
+def main():
+    if len(sys.argv) != 5:
+        print("Invalid Input! Please take the following command line 5 arguments:\n\thw1.py <initial state file> <goal state file> <mode> <output file>\n")
         exit()
+    else:
+        init = readfile(sys.argv[1])
+        print("init:", init)
+        goal = readfile(sys.argv[2])
+        print("goal:", goal)
+        mode = sys.argv[3]
+        output = sys.argv[4]
+
+        if mode == 'bfs':
+            bfs(init, goal, output)
+        elif mode == 'dfs':
+            dfs(init, goal, output)
+        elif mode == 'iddfs':
+            iddfs(init, goal, output)
+        elif mode == 'astar':
+            astar(init, goal, output)
+        else:
+            print("Invalid mode. Please try again.")
+            exit()
+
+    
+if __name__ == "__main__":
+    main()
