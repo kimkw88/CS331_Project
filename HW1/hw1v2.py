@@ -38,13 +38,13 @@ class Node:
                 state[RIGHT][WOLVES] += 1 # wolf
                 state[LEFT][BOAT] = 0 # boat
                 state[RIGHT][BOAT] = 1 # boat
-            if method == 4:
+            if method == 5:
                 # transport 2 wolves
                 state[LEFT][WOLVES] -= 2 # wolf
                 state[RIGHT][WOLVES] += 2 # wolf
                 state[LEFT][BOAT] = 0 # boat
                 state[RIGHT][BOAT] = 1 # boat
-            if method == 5:
+            if method == 4:
                 # transport 1 chick and 1 wolf
                 state[LEFT][CHICKEN] -= 1 # chicken
                 state[RIGHT][CHICKEN] += 1 # chicken
@@ -99,8 +99,9 @@ class Node:
         self.method = method
 
 
-def traceback(node, count):
+def traceback(node, count, output):
     solution = []
+    solution_arr = []
     solution_count = 0
     while node != None:
         if node.method == 1:
@@ -113,16 +114,23 @@ def traceback(node, count):
             solution.append("Put one wolf and one chicken in the boat")
         elif node.method == 5:
             solution.append("Put two wolves in the boat")
+        solution_arr.append(node.state)
         solution_count += 1
         node = node.par_node
 
     solution.reverse()
-    print("Reached Goal!")
-    print("Solution: ")
+    solution_arr.reverse()
+    file = open(output, "w")
     for x in solution:
         print(x)
+        file.write(x + "\n")
+    for y in solution_arr:
+        print(y)
     print("Solution count: ", solution_count)
+    file.write("Solution count: " + str(solution_count) + "\n")
     print("Expanded count: ", count)
+    file.write("Expanded count: " + str(count) + "\n")
+    file.close()
 
 # Breadth-First Search
 def bfs(init, goal):
@@ -199,7 +207,7 @@ def main():
             print("Invalid mode. Please try again.")
             exit()
 
-    traceback(res[0], res[1])
+    traceback(res[0], res[1], output)
 
     
 if __name__ == "__main__":
