@@ -124,8 +124,8 @@ def traceback(node, count, output):
     for x in solution:
         print(x)
         file.write(x + "\n")
-    for y in solution_arr:
-        print(y)
+    #for y in solution_arr:
+        #print(y)
     print("Solution count: " + str(solution_count))
     file.write("Solution count: " + str(solution_count) + "\n")
     print("Expanded count: " + str(solution_count))
