@@ -87,10 +87,10 @@ class Node:
                 state[RIGHT][BOAT] = 0 # boat
             
         # check if chickens are greater than or equal to wolves
-        if not (state[LEFT][CHICKEN] >= 0 and state[LEFT][CHICKEN] <= 3 \
-           and state[LEFT][WOLVES] >= 0 and state[LEFT][WOLVES] <= 3 \
-           and state[RIGHT][CHICKEN] >= 0 and state[RIGHT][CHICKEN] <= 3 \
-           and state[RIGHT][WOLVES] >= 0 and state[RIGHT][WOLVES] <= 3 \
+        if not (state[LEFT][CHICKEN] >= 0 \
+           and state[LEFT][WOLVES] >= 0 \
+           and state[RIGHT][CHICKEN] >= 0 \
+           and state[RIGHT][WOLVES] >= 0 \
            and (state[LEFT][CHICKEN] == 0 or state[LEFT][CHICKEN] >= state[LEFT][WOLVES]) \
            and (state[RIGHT][CHICKEN] == 0 or state[RIGHT][CHICKEN] >= state[RIGHT][WOLVES])):
             method = 0
@@ -179,6 +179,11 @@ def dfs(init, goal):
                         return child_node, expanded
                     que.put(child_node)
 
+
+# Depth-Limited Search
+def dls(init, goal):
+    print("*")
+
 # Iterative-Deepening Depth First Search
 def iddfs(init, goal):
     print("***** ID-DFS mode:")
@@ -204,7 +209,29 @@ def readfile(filename):
 def main():
     if len(sys.argv) != 5:
         print("Invalid Input! Please take the following command line 5 arguments:\n\thw1.py <initial state file> <goal state file> <mode> <output file>\n")
-        exit()
+        # This is only used for debug Purpose. Erase when finished
+        init = readfile("HW1/start2.txt")
+        print("init:", init)
+        goal = readfile("HW1/goal2.txt")
+        print("goal:", goal)
+        mode = "bfs"
+        output = "output.txt"
+
+        if mode == 'bfs':
+            res = bfs(init, goal)
+        elif mode == 'dfs':
+            res = dfs(init, goal)
+        elif mode == 'iddfs':
+            iddfs(init, goal)
+        elif mode == 'astar':
+            astar(init, goal)
+        else:
+            print("Invalid mode. Please try again.")
+            exit()
+
+        traceback(res[0], res[1], output)
+        #exit()
+
     else:
         init = readfile(sys.argv[1])
         print("init:", init)
@@ -218,7 +245,7 @@ def main():
         elif mode == 'dfs':
             res = dfs(init, goal)
         elif mode == 'iddfs':
-            res = iddfs(init, goal)
+            iddfs(init, goal)
         elif mode == 'astar':
             astar(init, goal)
         else:
