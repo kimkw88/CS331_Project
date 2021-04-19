@@ -87,20 +87,45 @@ class Node:
                 state[RIGHT][BOAT] = 0 # boat
             
         # check if chickens are greater than or equal to wolves
-        if state[LEFT][CHICKEN] < 0 or state[LEFT][CHICKEN] > 3 \
-           or state[LEFT][WOLVES] < 0 or state[LEFT][WOLVES] > 3 \
-           or state[RIGHT][CHICKEN] < 0 or state[RIGHT][CHICKEN] > 3 \
-           or state[RIGHT][WOLVES] < 0 or state[RIGHT][WOLVES] > 3 \
-           or (state[LEFT][CHICKEN] != 0 and state[LEFT][CHICKEN] < state[LEFT][WOLVES]) \
-           or (state[RIGHT][CHICKEN] != 0 and state[RIGHT][CHICKEN] < state[RIGHT][WOLVES]):
+        if not (state[LEFT][CHICKEN] >= 0 and state[LEFT][CHICKEN] <= 3 \
+           and state[LEFT][WOLVES] >= 0 and state[LEFT][WOLVES] <= 3 \
+           and state[RIGHT][CHICKEN] >= 0 and state[RIGHT][CHICKEN] <= 3 \
+           and state[RIGHT][WOLVES] >= 0 and state[RIGHT][WOLVES] <= 3 \
+           and (state[LEFT][CHICKEN] == 0 or state[LEFT][CHICKEN] >= state[LEFT][WOLVES]) \
+           and (state[RIGHT][CHICKEN] == 0 or state[RIGHT][CHICKEN] >= state[RIGHT][WOLVES])):
             method = 0
 
         self.state = state
         self.method = method
 
 
+def traceback(node, count):
+    solution = []
+    solution_count = 0
+    while node != None:
+        if node.method == 1:
+            solution.append("Put one chicken in the boat")
+        elif node.method == 2:
+            solution.append("Put two chickens in the boat")
+        elif node.method == 3:
+            solution.append("Put one wolf in the boat")
+        elif node.method == 4:
+            solution.append("Put one wolf and one chicken in the boat")
+        elif node.method == 5:
+            solution.append("Put two wolves in the boat")
+        solution_count += 1
+        node = node.par_node
+
+    solution.reverse()
+    print("Reached Goal!")
+    print("Solution: ")
+    for x in solution:
+        print(x)
+    print("Solution count: ", solution_count)
+    print("Expanded count: ", count)
+
 # Breadth-First Search
-def bfs(init, goal, outputFile):
+def bfs(init, goal):
     print("***** BFS mode:")
     # Initial state node
     que  = queue.Queue()
@@ -110,35 +135,18 @@ def bfs(init, goal, outputFile):
 
     while que:
         cur_node = que.get()
-        explored.add(cur_node)
+        explored.add(tuple(tuple(i) for i in cur_node.state))
 
         # Create, append, que child node
         for i in range(1, 6):
             child_node = Node(cur_node, i, copy.deepcopy(cur_node.state))
             if child_node.method != 0:
                 expanded += 1
-                if child_node.state not in explored:
-                    if cur_node.state == goal:
-                        break
+                if tuple(tuple(i) for i in child_node.state) not in explored:
+                    if child_node.state == goal:
+                        return child_node, expanded
                     que.put(child_node)
 
-                
-    solution_count = 0
-
-    while True:
-        solution.append(cur_node)
-        solution_count += 1
-        if cur_node.par_node == -1:
-            break
-        cur_node = node_list[cur_node.par_node]
-
-    solution.reverse()
-    print("Reached Goal!")
-    print("Solution: ")
-    for x in solution:
-        print(x.state)
-    print("Solution count: ", solution_count)
-    print("Expanded count: ", count)
 
 # Depth-First Search
 def dfs(init, goal, outputFile):
@@ -180,7 +188,7 @@ def main():
         output = sys.argv[4]
 
         if mode == 'bfs':
-            bfs(init, goal, output)
+            res = bfs(init, goal)
         elif mode == 'dfs':
             dfs(init, goal, output)
         elif mode == 'iddfs':
@@ -190,6 +198,8 @@ def main():
         else:
             print("Invalid mode. Please try again.")
             exit()
+
+    traceback(res[0], res[1])
 
     
 if __name__ == "__main__":
