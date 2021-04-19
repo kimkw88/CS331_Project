@@ -180,14 +180,41 @@ def dfs(init, goal):
 
 
 # Depth-Limited Search
-def dls(init, goal):
-    print("*")
+def dls(init, goal, limit, expanded):
+    initial_node = Node(None, None, init)
+    return dls_(initial_node, goal, limit, expanded)
+
+def dls_(node, goal, limit, expanded):
+    if node.state == goal:
+        return node, expanded
+    elif limit == 0:
+        return "stop"
+    else:
+        stop = False
+        for i in range(1, 6):
+            child_node = Node(node, i, copy.deepcopy(node.state))
+            if child_node.method != 0:
+                expanded += 1
+                res = dls_(child_node, goal, limit - 1, expanded)
+                if res == "stop":
+                    stop = True
+                elif res:
+                    return res
+        if stop:
+            return "stop"
+        else:
+            return False
 
 # Iterative-Deepening Depth First Search
 def iddfs(init, goal):
     print("***** ID-DFS mode:")
-    
-
+    expanded = 0
+    max_depth = 10000000
+    for limit in range(max_depth):
+        res = dls(init, goal, limit, expanded)
+        if res != "stop":
+            return res
+        
 # A-star search
 def astar(init, goal):
     print("***** A* mode:")
@@ -209,11 +236,11 @@ def main():
     if len(sys.argv) != 5:
         print("Invalid Input! Please take the following command line 5 arguments:\n\thw1.py <initial state file> <goal state file> <mode> <output file>\n")
         # This is only used for debug Purpose. Erase when finished
-        init = readfile("HW1/start2.txt")
+        init = readfile("HW1/start1.txt")
         print("init:", init)
-        goal = readfile("HW1/goal2.txt")
+        goal = readfile("HW1/goal1.txt")
         print("goal:", goal)
-        mode = "bfs"
+        mode = "iddfs"
         output = "output.txt"
 
         if mode == 'bfs':
@@ -221,14 +248,13 @@ def main():
         elif mode == 'dfs':
             res = dfs(init, goal)
         elif mode == 'iddfs':
-            iddfs(init, goal)
+            res = iddfs(init, goal)
         elif mode == 'astar':
             astar(init, goal)
         else:
             print("Invalid mode. Please try again.")
             exit()
 
-        traceback(res[0], res[1], output)
         #exit()
 
     else:
@@ -244,7 +270,7 @@ def main():
         elif mode == 'dfs':
             res = dfs(init, goal)
         elif mode == 'iddfs':
-            iddfs(init, goal)
+            res = iddfs(init, goal)
         elif mode == 'astar':
             astar(init, goal)
         else:
