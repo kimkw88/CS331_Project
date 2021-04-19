@@ -157,17 +157,35 @@ def bfs(init, goal):
 
 
 # Depth-First Search
-def dfs(init, goal, outputFile):
+def dfs(init, goal):
     print("***** DFS mode:")
-     
+    # Initial state node
+    que  = queue.LifoQueue()
+    que.put(Node(None, 0, init))
+    explored  = set()
+    expanded = 0
+
+    while que:
+        cur_node = que.get()
+        explored.add(tuple(tuple(i) for i in cur_node.state))
+
+        # Create, append, que child node
+        for i in range(1, 6):
+            child_node = Node(cur_node, i, copy.deepcopy(cur_node.state))
+            if child_node.method != 0:
+                expanded += 1
+                if tuple(tuple(i) for i in child_node.state) not in explored:
+                    if child_node.state == goal:
+                        return child_node, expanded
+                    que.put(child_node)
 
 # Iterative-Deepening Depth First Search
-def iddfs(init, goal, outputFile):
+def iddfs(init, goal):
     print("***** ID-DFS mode:")
     
 
 # A-star search
-def astar(init, goal, outputFile):
+def astar(init, goal):
     print("***** A* mode:")
 
 
@@ -198,11 +216,11 @@ def main():
         if mode == 'bfs':
             res = bfs(init, goal)
         elif mode == 'dfs':
-            dfs(init, goal, output)
+            res = dfs(init, goal)
         elif mode == 'iddfs':
-            iddfs(init, goal, output)
+            res = iddfs(init, goal)
         elif mode == 'astar':
-            astar(init, goal, output)
+            astar(init, goal)
         else:
             print("Invalid mode. Please try again.")
             exit()
