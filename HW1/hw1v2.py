@@ -6,6 +6,7 @@
 
 import sys
 import copy
+import Queue
 
 LEFT  = 0
 RIGHT = 1
@@ -125,9 +126,9 @@ def traceback(node, count, output):
         file.write(x + "\n")
     for y in solution_arr:
         print(y)
-    print("Solution count: ", solution_count)
+    print("Solution count: " + str(solution_count))
     file.write("Solution count: " + str(solution_count) + "\n")
-    print("Expanded count: ", count)
+    print("Expanded count: " + str(solution_count))
     file.write("Expanded count: " + str(count) + "\n")
     file.close()
 
@@ -135,13 +136,13 @@ def traceback(node, count, output):
 def bfs(init, goal):
     print("***** BFS mode:")
     # Initial state node
-    que  = []
-    que.append(Node(None, 0, init))
+    que  = Queue.Queue()
+    que.put(Node(None, 0, init))
     explored  = set()
     expanded = 0
 
     while que:
-        cur_node = que.pop(0)
+        cur_node = que.get()
         explored.add(tuple(tuple(i) for i in cur_node.state))
 
         # Create, append, que child node
@@ -152,20 +153,20 @@ def bfs(init, goal):
                 if tuple(tuple(i) for i in child_node.state) not in explored:
                     if child_node.state == goal:
                         return child_node, expanded
-                    que.append(child_node)
+                    que.put(child_node)
 
 
 # Depth-First Search
 def dfs(init, goal):
     print("***** DFS mode:")
     # Initial state node
-    que  = []
-    que.append(Node(None, 0, init))
+    que = Queue.LifoQueue()
+    que.put(Node(None, 0, init))
     explored  = set()
     expanded = 0
 
     while que:
-        cur_node = que.pop()
+        cur_node = que.get()
         explored.add(tuple(tuple(i) for i in cur_node.state))
 
         # Create, append, que child node
@@ -176,7 +177,7 @@ def dfs(init, goal):
                 if tuple(tuple(i) for i in child_node.state) not in explored:
                     if child_node.state == goal:
                         return child_node, expanded
-                    que.append(child_node)
+                    que.put(child_node)
 
 
 # Depth-Limited Search
@@ -214,10 +215,34 @@ def iddfs(init, goal):
         res = dls(init, goal, limit, expanded)
         if res != "stop":
             return res
-        
+
+
+def eval(state, goal):
+    return (goal[LEFT][CHICKEN] + goal[LEFT][WOLVES] - state[LEFT][CHICKEN] - state[LEFT][WOLVES])
+
 # A-star search
 def astar(init, goal):
     print("***** A* mode:")
+    initial_node = Node(None, None, init)
+    que = Queue.PriorityQueue()
+    que.put((eval(initial_node.state, goal), initial_node))
+    explored = set()
+    expanded = 0
+
+    while que:
+        cur_node = que.get()[1]
+        explored.add(tuple(tuple(i) for i in cur_node.state))
+
+        # Create, append, que child node
+        for i in range(1, 6):
+            child_node = Node(cur_node, i, copy.deepcopy(cur_node.state))
+            if child_node.method != 0:
+                expanded += 1
+                if tuple(tuple(i) for i in child_node.state) not in explored:
+                    if child_node.state == goal:
+                        return child_node, expanded
+                    que.put((eval(child_node.state, goal), child_node))
+
 
 
 def readfile(filename):
@@ -235,33 +260,13 @@ def readfile(filename):
 def main():
     if len(sys.argv) != 5:
         print("Invalid Input! Please take the following command line 5 arguments:\n\thw1.py <initial state file> <goal state file> <mode> <output file>\n")
-        # This is only used for debug Purpose. Erase when finished
-        init = readfile("HW1/start1.txt")
-        print("init:", init)
-        goal = readfile("HW1/goal1.txt")
-        print("goal:", goal)
-        mode = "iddfs"
-        output = "output.txt"
-
-        if mode == 'bfs':
-            res = bfs(init, goal)
-        elif mode == 'dfs':
-            res = dfs(init, goal)
-        elif mode == 'iddfs':
-            res = iddfs(init, goal)
-        elif mode == 'astar':
-            astar(init, goal)
-        else:
-            print("Invalid mode. Please try again.")
-            exit()
-
-        #exit()
+        exit()
 
     else:
         init = readfile(sys.argv[1])
-        print("init:", init)
+        print("init:" + str(init))
         goal = readfile(sys.argv[2])
-        print("goal:", goal)
+        print("goal:" + str(goal))
         mode = sys.argv[3]
         output = sys.argv[4]
 
@@ -272,7 +277,7 @@ def main():
         elif mode == 'iddfs':
             res = iddfs(init, goal)
         elif mode == 'astar':
-            astar(init, goal)
+            res = astar(init, goal)
         else:
             print("Invalid mode. Please try again.")
             exit()
