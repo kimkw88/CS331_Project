@@ -6,7 +6,6 @@
 
 import sys
 import copy
-import queue
 
 LEFT  = 0
 RIGHT = 1
@@ -136,13 +135,13 @@ def traceback(node, count, output):
 def bfs(init, goal):
     print("***** BFS mode:")
     # Initial state node
-    que  = queue.Queue()
-    que.put(Node(None, 0, init))
+    que  = []
+    que.append(Node(None, 0, init))
     explored  = set()
     expanded = 0
 
     while que:
-        cur_node = que.get()
+        cur_node = que.pop(0)
         explored.add(tuple(tuple(i) for i in cur_node.state))
 
         # Create, append, que child node
@@ -153,20 +152,20 @@ def bfs(init, goal):
                 if tuple(tuple(i) for i in child_node.state) not in explored:
                     if child_node.state == goal:
                         return child_node, expanded
-                    que.put(child_node)
+                    que.append(child_node)
 
 
 # Depth-First Search
 def dfs(init, goal):
     print("***** DFS mode:")
     # Initial state node
-    que  = queue.LifoQueue()
-    que.put(Node(None, 0, init))
+    que  = []
+    que.append(Node(None, 0, init))
     explored  = set()
     expanded = 0
 
     while que:
-        cur_node = que.get()
+        cur_node = que.pop()
         explored.add(tuple(tuple(i) for i in cur_node.state))
 
         # Create, append, que child node
@@ -177,7 +176,7 @@ def dfs(init, goal):
                 if tuple(tuple(i) for i in child_node.state) not in explored:
                     if child_node.state == goal:
                         return child_node, expanded
-                    que.put(child_node)
+                    que.append(child_node)
 
 
 # Depth-Limited Search
